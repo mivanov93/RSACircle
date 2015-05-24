@@ -82,26 +82,53 @@ public class Main {
     }
 
     private static void run() throws InterruptedException, ExecutionException {
-        Point[] points = new Point[15];
+        Point[] points = new Point[488];
         for (int i = 0; i < points.length; i++) {
             points[i] = new Point(1.0 + 3 * i + randomWithRange(1, 100), 1.7 + i + randomWithRange(1, 100));
             // new Point((double)randomWithRange(1,100), (double)randomWithRange(1,100));
 
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        points[0] = new Point(28.0, 62.7);
+        points[1] = new Point(61.0, 45.7);
+        points[2] = new Point(53.0, 37.7);
+        points[3] = new Point(29.0, 8.7);
+        points[4] = new Point(40.0, 41.7);
+        points[5] = new Point(113.0, 63.7);
+        points[6] = new Point(99.0, 58.7);
+        int threadNum = 1;
+        int pointsPerThread = points.length;
+        int maxThreads = 4;
+        int minPointsPerThread = 2;
+        if (points.length > minPointsPerThread * 2) {
+            threadNum = Math.min(maxThreads, points.length / minPointsPerThread);
+            pointsPerThread = points.length / threadNum;
+        }
+        ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
 
         Set<Callable<Circle>> callables = new HashSet<>();
-        callables.add(new FindSecWorker(points, 0, 15));
-        List<Future<Circle>> futures = executorService.invokeAll(callables);
-
-        for (Future<Circle> future : futures) {
-            System.out.println("future.get = " + future.get());
+        for (int i = 0; i < threadNum; i++) {
+            int end = (i == threadNum - 1 ? points.length : (i + 1) * pointsPerThread);
+            callables.add(new FindSecWorker(points, i * pointsPerThread, end));
         }
 
-        
-        executorService.shutdown();
+        List<Future<Circle>> futures = executorService.invokeAll(callables);
 
-        // new Thread(new FindSecWorker(points, 5, 15)).start();
-        //new Thread(new FindSecWorker(points, 0, 4)).start();
+        Circle solution = null;
+        for (Future<Circle> future : futures) {
+            if (solution == null || (future.get() != null && future.get().getRadius() < solution.getRadius())) {
+                solution = future.get();
+            }
+        }
+
+        executorService.shutdown();
+        
+        Circle singleSol = new FindSecWorker(points, 0, points.length).call();
+//        if (singleSol == null) {
+//            for (Point point : points) {
+//                System.out.println(point);
+//            }
+//        }
+        System.out.println("Multi-thread result " + solution);
+        System.out.println("Single thread check " + singleSol);
     }
 }

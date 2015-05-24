@@ -21,12 +21,14 @@ public class FindSecWorker implements Callable {
 
     @Override
     public Circle call() {
-        System.out.println("New thread call() started");
+        System.out.println("New thread call() started - from "+mstartIndex+" to "+mendIndex);
+        long startTime = System.nanoTime();
         Circle testPointSol;
 
         for (int i = mstartIndex; i < mendIndex; i++) {
             //System.out.println(mpoints[i].printVal());
             for (int j = i+1; j < mpoints.length; j++) {
+                System.out.println(i+" "+j);
                 testPointSol = new Circle(mpoints[i], mpoints[j]);
                 //System.out.println(i+" "+j+testPointSol.getCenter()+" "+testPointSol.getRadius());
                 //System.out.println(mpoints[i].printVal()+" "+mpoints[j].printVal());
@@ -39,7 +41,7 @@ public class FindSecWorker implements Callable {
                 }
 
                 for (int k = j+1; k < mpoints.length; k++) {
-                     //System.out.println(mpoints[i].printVal()+" "+mpoints[j].printVal()+" "+mpoints[k].printVal());
+                    //System.out.println(i+" "+j+" "+k);
                     try {
                         testPointSol = new Circle(mpoints[i], mpoints[j], mpoints[k]);
                         //System.out.println("go "+testPointSol+
@@ -61,6 +63,8 @@ public class FindSecWorker implements Callable {
 //        } else {
 //            System.out.println("no solution");
 //        }
+        long duration = (System.nanoTime()-startTime)/1000000;//in ms
+        System.out.println("Thread from "+mstartIndex+" to "+mendIndex+" finished in "+duration+"ms");
         return solution;
     }
 

@@ -115,7 +115,7 @@ public class Circle {
     public int contain(Point point) {
         int answer = 0;
         double d = p.distance(point);
-        if (d == r || (d < r+0.000001 && d > r-0.000001) ) {
+        if (d == r || (d < r+0.001 && d > r-0.001) ) {
             //System.out.println(point.printVal()+" not in center "+this.getCenter()+" rad "+this.getRadius());
             answer = 0;		// The point is on the circumference of the circle
         } else if (d < r) {
