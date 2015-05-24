@@ -26,6 +26,7 @@ public class FindSecWorker implements Runnable {
             //System.out.println(mpoints[i].printVal());
             for (int j = i+1; j < mpoints.length; j++) {
                 testPointSol = new Circle(mpoints[i], mpoints[j]);
+                //System.out.println(i+" "+j+testPointSol.getCenter()+" "+testPointSol.getRadius());
                 //System.out.println(mpoints[i].printVal()+" "+mpoints[j].printVal());
                 if (testPointSol.containAll(mpoints)) {
                     System.out.println("ff3");
@@ -52,7 +53,7 @@ public class FindSecWorker implements Runnable {
             }
         }
         if (solution != null) {
-            System.out.println(solution.getRadius() + " " + solution.getCenter().getX() + "," + solution.getCenter().getY());
+            System.out.println("rad = "+solution.getRadius() + " " + solution.getCenter().getX() + "," + solution.getCenter().getY());
         } else {
             System.out.println("no solution");
         }

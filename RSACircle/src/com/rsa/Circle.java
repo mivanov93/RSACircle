@@ -50,11 +50,14 @@ public class Circle {
         int cross = dxc * dyl - dyc * dxl;
         if(cross != 0)
             throw new Exception("points on the same line");
-        int x = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
+        int x = (int) Math.ceil((p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + 
+                (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
                 * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
-                / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY())));
-        int y = (p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - p2.getY()) * (x - (p2.getX() + p3.getX()) / 2);
-        p = new Point(x, y);
+                / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) 
+                + p2.getX() * (-p1.getY() + p3.getY()))));
+        int y = (int)Math.ceil((p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - 
+                p2.getY()) * (x - (p2.getX() + p3.getX()) / 2));
+        p = new Point(x, y); 
         r = p.distance(p1);
     }
 
@@ -113,6 +116,7 @@ public class Circle {
         int answer = 0;
         double d = p.distance(point);
         if (d > r) {
+            //System.out.println(point.printVal()+" not in center "+this.getCenter()+" rad "+this.getRadius());
             answer = 1;		// The point is outside the circle
         } else if (d == r) {
             answer = 0;		// The point is on the circumference of the circle

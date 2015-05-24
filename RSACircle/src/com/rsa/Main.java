@@ -60,10 +60,16 @@ public class Main {
         }
     }
 
+    private static int randomWithRange(int min, int max) {
+        int range = (max - min) + 1;
+        return (int) (Math.random() * range) + min;
+    }
+
     private static void run() {
         Point[] points = new Point[10];
         for (int i = 0; i < points.length; i++) {
-            points[i] = new Point(1, 1 + i);
+            points[i] = new Point(randomWithRange(1,100), randomWithRange(1,100));//new Point(1, 1+i);
+                    
         }
         new Thread(new FindSecWorker(points, 0, points.length)).start();
 
