@@ -68,7 +68,8 @@ public class Main {
     private static void run() {
         Point[] points = new Point[10];
         for (int i = 0; i < points.length; i++) {
-            points[i] = new Point(randomWithRange(1,100), randomWithRange(1,100));//new Point(1, 1+i);
+            points[i] = new Point(1.0, 1.0+(double)i);
+                   // new Point((double)randomWithRange(1,100), (double)randomWithRange(1,100));
                     
         }
         new Thread(new FindSecWorker(points, 0, points.length)).start();

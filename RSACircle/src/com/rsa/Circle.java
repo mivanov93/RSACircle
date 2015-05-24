@@ -40,25 +40,22 @@ public class Circle {
     // Construct a circle based on three points
     public Circle(Point p1, Point p2, Point p3) throws Exception {
 
-        int dxc = p3.getX() - p1.getX();
-        int dyc = p3.getY() - p1.getY();
+        double dxc = p3.getX() - p1.getX();
+        double dyc = p3.getY() - p1.getY();
 
-        int dxl = p2.getX() - p1.getX();
-        int dyl = p2.getY() - p1.getY();
+        double dxl = p2.getX() - p1.getX();
+        double dyl = p2.getY() - p1.getY();
         
 
-        int cross = dxc * dyl - dyc * dxl;
-        if(cross != 0)
+        double cross = dxc * dyl - dyc * dxl;
+        if(cross == 0)
             throw new Exception("points on the same line");
-        int x = (int) Math.ceil((p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + 
-                (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
-                * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
-                / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) 
-                + p2.getX() * (-p1.getY() + p3.getY()))));
-        int y = (int)Math.ceil((p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - 
-                p2.getY()) * (x - (p2.getX() + p3.getX()) / 2));
-        p = new Point(x, y); 
-        r = p.distance(p1);
+        double x = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
+                    * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
+                    / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY())));
+            double y = (p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - p2.getY()) * (x - (p2.getX() + p3.getX()) / 2);
+            p = new Point(x, y);
+            r = p.distance(p1);
     }
 
     // Get the center

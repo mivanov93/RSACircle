@@ -40,20 +40,22 @@ public class FindSecWorker implements Runnable {
                      //System.out.println(mpoints[i].printVal()+" "+mpoints[j].printVal()+" "+mpoints[k].printVal());
                     try {
                         testPointSol = new Circle(mpoints[i], mpoints[j], mpoints[k]);
+                        //System.out.println("go "+testPointSol+
+                        //        mpoints[i].getVals()+mpoints[j].getVals()+mpoints[k].getVals());
                         if (testPointSol.containAll(mpoints)) {
                             if (solution == null || testPointSol.getRadius() < solution.getRadius()) {
                                 solution = testPointSol;
-                                System.out.println("ff");
+                                //System.out.println("ff");
                             }
                         }
                     } catch (Exception ex) {
-                        
+                        //System.out.println("skipping");
                     }
                 }
             }
         }
         if (solution != null) {
-            System.out.println("rad = "+solution.getRadius() + " " + solution.getCenter().getX() + "," + solution.getCenter().getY());
+            System.out.println(solution);
         } else {
             System.out.println("no solution");
         }
