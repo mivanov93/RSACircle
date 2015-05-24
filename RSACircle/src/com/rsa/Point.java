@@ -3,9 +3,9 @@ package com.rsa;
 public class Point {
 
     // The x corrdinate of a point
-    private double x;
+    private int x;
     // The y corrdinate of a point
-    private double y;
+    private int y;
 
     // Construct a point at the origin
     public Point() {
@@ -14,7 +14,7 @@ public class Point {
     }
 
     // Construct a point at the specified location (xVal, yVal)
-    public Point(double xVal, double yVal) {
+    public Point(int xVal, int yVal) {
         x = xVal;
         y = yVal;
     }
@@ -26,25 +26,29 @@ public class Point {
     }
 
     // Get the x corrdinate
-    public double getX() {
+    public int getX() {
         return x;
     }
 
     // Get the y corrdinate
 
-    public double getY() {
+    public int getY() {
         return y;
+    }
+    
+    public String printVal() {
+        return getX()+","+getY();
     }
 
     // Set the x corrdinate
 
-    public void setX(double xVal) {
+    public void setX(int xVal) {
         x = xVal;
     }
 
     // Set the y corrdinate
 
-    public void setY(double yVal) {
+    public void setY(int yVal) {
         y = yVal;
     }
 
@@ -55,14 +59,14 @@ public class Point {
 
     // Translate a point to the specified location (newX, newY)
 
-    public void translate(double newX, double newY) {
+    public void translate(int newX, int newY) {
         x = newX;
         y = newY;
     }
 
     // Offset a point along the x and y axes by dx and dy, respectively
 
-    public void offset(double dx, double dy) {
+    public void offset(int dx, int dy) {
         x += dx;
         y += dy;
     }
