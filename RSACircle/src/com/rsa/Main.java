@@ -53,7 +53,7 @@ public class Main {
             sMap.put("n", cmd.getOptionValue("n"));
             sMap.put("i", cmd.getOptionValue("i"));
             sMap.put("t", cmd.getOptionValue("t"));
-            sMap.put("q", cmd.getOptionValue("q"));
+            sMap.put("q", cmd.hasOption("q") + "");
             
         } catch (ParseException ex) {
             System.err.println( "Parsing failed.  Reason: " + ex.getMessage());
