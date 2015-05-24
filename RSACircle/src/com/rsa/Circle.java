@@ -47,7 +47,7 @@ public class Circle {
         double dyl = p2.getY() - p1.getY();
 
         double cross = dxc * dyl - dyc * dxl;
-        if (cross < 0.0000001) {
+        if (cross > 0.0000001 && cross < 0.0000001) {
             throw new Exception("points on the same line");
         }
         double x = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
@@ -115,14 +115,13 @@ public class Circle {
     public int contain(Point point) {
         int answer = 0;
         double d = p.distance(point);
-        if (d == r || (d < r+0.001 && d > r-0.001) ) {
+        if (d == r || (r+0.01 > d && r > d-0.01) ) {
             //System.out.println(point.printVal()+" not in center "+this.getCenter()+" rad "+this.getRadius());
             answer = 0;		// The point is on the circumference of the circle
         } else if (d < r) {
             answer = -1;	// The point is inside the circle
         } else {
             answer = 1;		// The point is outside the circle
-
         }
         return answer;
     }

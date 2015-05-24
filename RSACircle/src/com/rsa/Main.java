@@ -28,6 +28,7 @@ public class Main {
         configOptions();
         parseOptions(args);
         try {
+            for(int i=0; i < 10000; i++)
             run();
         } catch (InterruptedException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,19 +83,10 @@ public class Main {
     }
 
     private static void run() throws InterruptedException, ExecutionException {
-        Point[] points = new Point[488];
+        Point[] points = new Point[10];
         for (int i = 0; i < points.length; i++) {
-            points[i] = new Point(1.0 + 3 * i + randomWithRange(1, 100), 1.7 + i + randomWithRange(1, 100));
-            // new Point((double)randomWithRange(1,100), (double)randomWithRange(1,100));
-
+            points[i] = new Point(Math.random()+randomWithRange(1, 100), Math.random()+randomWithRange(1, 100));
         }
-        points[0] = new Point(28.0, 62.7);
-        points[1] = new Point(61.0, 45.7);
-        points[2] = new Point(53.0, 37.7);
-        points[3] = new Point(29.0, 8.7);
-        points[4] = new Point(40.0, 41.7);
-        points[5] = new Point(113.0, 63.7);
-        points[6] = new Point(99.0, 58.7);
         int threadNum = 1;
         int pointsPerThread = points.length;
         int maxThreads = 4;
@@ -123,11 +115,12 @@ public class Main {
         executorService.shutdown();
         
         Circle singleSol = new FindSecWorker(points, 0, points.length).call();
-//        if (singleSol == null) {
-//            for (Point point : points) {
-//                System.out.println(point);
-//            }
-//        }
+        if (singleSol == null) {
+            for (Point point : points) {
+                System.out.println(point);
+            }
+            System.exit(1);
+        }
         System.out.println("Multi-thread result " + solution);
         System.out.println("Single thread check " + singleSol);
     }
