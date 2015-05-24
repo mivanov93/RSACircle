@@ -45,17 +45,20 @@ public class Circle {
 
         double dxl = p2.getX() - p1.getX();
         double dyl = p2.getY() - p1.getY();
-        
 
         double cross = dxc * dyl - dyc * dxl;
-        if(cross == 0)
+        if (cross < 0.0000001) {
             throw new Exception("points on the same line");
+        }
         double x = (p3.getX() * p3.getX() * (p1.getY() - p2.getY()) + (p1.getX() * p1.getX() + (p1.getY() - p2.getY()) * (p1.getY() - p3.getY()))
-                    * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
-                    / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY())));
-            double y = (p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - p2.getY()) * (x - (p2.getX() + p3.getX()) / 2);
-            p = new Point(x, y);
-            r = p.distance(p1);
+                * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
+                / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY())));
+        double y = (p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - p2.getY()) * (x - (p2.getX() + p3.getX()) / 2);
+        if (!Double.isFinite(x) || !Double.isFinite(y)) {
+            throw new Exception("not real points");
+        }
+        p = new Point(x, y);
+        r = p.distance(p1);
     }
 
     // Get the center
@@ -112,13 +115,14 @@ public class Circle {
     public int contain(Point point) {
         int answer = 0;
         double d = p.distance(point);
-        if (d > r) {
+        if (d == r || (d < r+0.000001 && d > r-0.000001) ) {
             //System.out.println(point.printVal()+" not in center "+this.getCenter()+" rad "+this.getRadius());
-            answer = 1;		// The point is outside the circle
-        } else if (d == r) {
             answer = 0;		// The point is on the circumference of the circle
-        } else {
+        } else if (d < r) {
             answer = -1;	// The point is inside the circle
+        } else {
+            answer = 1;		// The point is outside the circle
+
         }
         return answer;
     }
@@ -138,7 +142,9 @@ public class Circle {
     }
 
     // Return a representation of a point as a string
+    @Override
     public String toString() {
+        //System.out.println("dd");
         return "Center = (" + p.getX() + ", " + p.getY() + "); " + "Radius = " + r;
     }
 }

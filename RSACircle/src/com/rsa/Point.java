@@ -77,6 +77,7 @@ public class Point {
     public double distance(Point point) {
         double dx = x - point.x;
         double dy = y - point.y;
+        //System.out.println(y+" "+point.y+" "+dx+" "+dy+" "+dx * dx + dy * dy);
         return Math.sqrt(dx * dx + dy * dy);
     }
 

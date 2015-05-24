@@ -1,8 +1,9 @@
 package com.rsa;
 
 import com.rsa.Circle;
+import java.util.concurrent.Callable;
 
-public class FindSecWorker implements Runnable {
+public class FindSecWorker implements Callable {
 
     private final Point[] mpoints;
     private final int mstartIndex, mendIndex;
@@ -19,7 +20,8 @@ public class FindSecWorker implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Circle call() {
+        System.out.println("New thread call() started");
         Circle testPointSol;
 
         for (int i = mstartIndex; i < mendIndex; i++) {
@@ -29,10 +31,10 @@ public class FindSecWorker implements Runnable {
                 //System.out.println(i+" "+j+testPointSol.getCenter()+" "+testPointSol.getRadius());
                 //System.out.println(mpoints[i].printVal()+" "+mpoints[j].printVal());
                 if (testPointSol.containAll(mpoints)) {
-                    System.out.println("ff3");
+                    //System.out.println("ff3");
                     if (solution == null || testPointSol.getRadius() < solution.getRadius()) {
                         solution = testPointSol;
-                        System.out.println("ff1");
+                       // System.out.println("ff1");
                     }
                 }
 
@@ -54,11 +56,12 @@ public class FindSecWorker implements Runnable {
                 }
             }
         }
-        if (solution != null) {
-            System.out.println(solution);
-        } else {
-            System.out.println("no solution");
-        }
+//       if (solution != null) {
+//            System.out.println(solution);
+//        } else {
+//            System.out.println("no solution");
+//        }
+        return solution;
     }
 
 }

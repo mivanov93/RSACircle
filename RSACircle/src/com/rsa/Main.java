@@ -1,7 +1,17 @@
 package com.rsa;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -17,7 +27,13 @@ public class Main {
 
         configOptions();
         parseOptions(args);
-        run();
+        try {
+            run();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ExecutionException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private static void configOptions() {
@@ -65,14 +81,27 @@ public class Main {
         return (int) (Math.random() * range) + min;
     }
 
-    private static void run() {
-        Point[] points = new Point[10];
+    private static void run() throws InterruptedException, ExecutionException {
+        Point[] points = new Point[15];
         for (int i = 0; i < points.length; i++) {
-            points[i] = new Point(1.0, 1.0+(double)i);
-                   // new Point((double)randomWithRange(1,100), (double)randomWithRange(1,100));
-                    
-        }
-        new Thread(new FindSecWorker(points, 0, points.length)).start();
+            points[i] = new Point(1.0 + 3 * i + randomWithRange(1, 100), 1.7 + i + randomWithRange(1, 100));
+            // new Point((double)randomWithRange(1,100), (double)randomWithRange(1,100));
 
+        }
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        Set<Callable<Circle>> callables = new HashSet<>();
+        callables.add(new FindSecWorker(points, 0, 15));
+        List<Future<Circle>> futures = executorService.invokeAll(callables);
+
+        for (Future<Circle> future : futures) {
+            System.out.println("future.get = " + future.get());
+        }
+
+        
+        executorService.shutdown();
+
+        // new Thread(new FindSecWorker(points, 5, 15)).start();
+        //new Thread(new FindSecWorker(points, 0, 4)).start();
     }
 }
