@@ -47,6 +47,7 @@ public class Circle {
         double dyl = p2.getY() - p1.getY();
 
         double cross = dxc * dyl - dyc * dxl;
+        //should this be equal
         if (cross > 0.0000001 && cross < 0.0000001) {
             throw new Exception("points on the same line");
         }
