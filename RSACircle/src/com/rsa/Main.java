@@ -1,9 +1,13 @@
 package com.rsa;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +30,8 @@ public class Main {
     private static int randPointsNum;
     private static boolean quietFlag;
     private static String filePath;
+    private final static int maxCoord = 10240;
+    private final static int minCoord = 0;
 
     private enum Mode {
 
@@ -44,6 +50,8 @@ public class Main {
         } catch (InterruptedException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ExecutionException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -99,7 +107,54 @@ public class Main {
         return (int) (Math.random() * range) + min;
     }
 
-    private static void run(Mode runMode, int maxThreads, int randPointNum, String filePath, boolean quietFlag) throws InterruptedException, ExecutionException {
+    private static void showPoints(Point[] points) {
+        for (Point point : points) {
+            System.out.println(point);
+        }
+    }
+
+    private static Point[] fileToPoints(String filePath) throws Exception {
+        Point[] points = null;
+        if (filePath == null) {
+            throw new Exception("null");
+        }
+
+        FileReader fin = new FileReader(filePath);
+
+        Scanner src = new Scanner(fin);
+        int i, count = 0, k = 0, lastI = 0, len = 0;
+        while (src.hasNext()) {
+            if (src.hasNextInt()) {
+                i = src.nextInt();
+                if (count == 0) {
+                    len = i;
+                    points = new Point[i];
+                } else {
+                    if (i > maxCoord || i < minCoord) {
+                        throw new Exception("Points in file not in the correct range");
+                    }
+
+                    if (count != 1 && (count == 2 || count % 2 == 1)) {
+                        if(k > points.length-1)
+                            throw new Exception("Too many points in file");
+                        points[k++] = new Point(lastI, i);
+                    }
+                }
+                lastI = i;
+            } else {
+                throw new Exception("Points in file with incorrect coords.");
+            }
+            count++;
+        }
+        fin.close();
+        // System.out.println("int: " + i);
+        if (len == 0 || points.length != len) {
+            throw new Exception("Not enough points in file");
+        }
+        return points;
+    }
+
+    private static void run(Mode runMode, int maxThreads, int randPointNum, String filePath, boolean quietFlag) throws Exception {
         Point[] points = null;
         if (runMode == Mode.RANDOM) {
             points = new Point[randPointNum];
@@ -112,7 +167,7 @@ public class Main {
                 return;
             }
         } else {
-            System.exit(1);
+            points = fileToPoints(filePath);
         }
         int threadNum = 1;
         int pointsPerThread = points.length;
@@ -145,9 +200,7 @@ public class Main {
 
         Circle singleSol = new FindSecWorker(points, 0, points.length, quietFlag).call();
         if (singleSol == null || solution == null) {
-            for (Point point : points) {
-                System.out.println(point);
-            }
+            showPoints(points);
             System.exit(1);
         }
 
