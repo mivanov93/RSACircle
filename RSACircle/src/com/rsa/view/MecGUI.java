@@ -56,15 +56,17 @@ class DrawPanel extends JPanel {
         
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
-        g2d.scale(0.5, 0.5);
-        
+        Double pScale=1.0;
+        g2d.scale(pScale, pScale);
+        Double xDisp=100/pScale;
+        Double yDisp=100/pScale;
         for (Point p: mPoints) {
             System.out.println("Drawing: " + p.getX() + ", " + p.getY());
-            g2d.draw(new Line2D.Double(p.getX(), p.getY(), p.getX(), p.getY()));
+            g2d.draw(new Line2D.Double(p.getX()+xDisp, p.getY()+yDisp, p.getX()+xDisp, p.getY()+yDisp));
         }
         
         System.out.println("Drawing circle... with center: " + mCircle.getCenter() + " d = " + mCircle.getDiameter());
-        g2d.draw(new Ellipse2D.Double(mCircle.getCenter().getX() - mCircle.getRadius(), mCircle.getCenter().getY() - mCircle.getRadius(), mCircle.getDiameter(), mCircle.getDiameter()));
+        g2d.draw(new Ellipse2D.Double(mCircle.getCenter().getX() - mCircle.getRadius()+xDisp, mCircle.getCenter().getY()+yDisp - mCircle.getRadius(), mCircle.getDiameter(), mCircle.getDiameter()));
         
         //setLocation((int)mCircle.getCenter().getX(), (int)mCircle.getCenter().getY());
     }
