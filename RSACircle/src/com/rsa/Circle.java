@@ -55,9 +55,11 @@ public class Circle {
                 * (p2.getY() - p3.getY()) + p2.getX() * p2.getX() * (-p1.getY() + p3.getY()))
                 / (2 * (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY())));
         double y = (p2.getY() + p3.getY()) / 2 - (p3.getX() - p2.getX()) / (p3.getY() - p2.getY()) * (x - (p2.getX() + p3.getX()) / 2);
-        if (!Double.isFinite(x) || !Double.isFinite(y)) {
+        
+        if (Double.isInfinite(x) || Double.isInfinite(y)) {
             throw new Exception("not real points");
         }
+        
         p = new Point(x, y);
         r = p.distance(p1);
     }

@@ -1,12 +1,11 @@
 package com.rsa;
 
+import com.rsa.view.MecGUI;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -16,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -25,16 +25,17 @@ import org.apache.commons.cli.ParseException;
 public class Main {
 
     private static Options sOptions;
-    private static int maxThreads;
     private static Mode runMode;
+    
     private static int randPointsNum;
-    private static boolean quietFlag;
     private static String filePath;
-    private final static int maxCoord = 10240;
-    private final static int minCoord = 0;
+    private static int maxThreads;
+    private static boolean quietFlag;
+    
+    private static final int maxCoord = 10240;
+    private static final int minCoord = 0;
 
     private enum Mode {
-
         FILE, RANDOM
     }
 
@@ -42,6 +43,7 @@ public class Main {
 
         configOptions();
         parseOptions(args);
+        
         System.out.println("Debug: " + runMode + " mode, " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file, quiet=" + quietFlag);
         try {
             for (int i = 0; i < 1; i++) {
@@ -85,10 +87,13 @@ public class Main {
 
             if (cmd.hasOption("n")) {
                 randPointsNum = Integer.parseInt(cmd.getOptionValue("n"));
-                runMode = Mode.RANDOM;
+                runMode       = Mode.RANDOM;
             } else if (cmd.hasOption("i")) {
-                runMode = Mode.FILE;
-                filePath = cmd.getOptionValue("i");
+                filePath      = cmd.getOptionValue("i");
+                runMode       = Mode.FILE;
+            } else {
+                System.err.println("Verify validation...");
+                System.exit(1);
             }
 
             maxThreads = Integer.parseInt(cmd.getOptionValue("t"));
@@ -155,31 +160,35 @@ public class Main {
     }
 
     private static void run(Mode runMode, int maxThreads, int randPointNum, String filePath, boolean quietFlag) throws Exception {
-        Point[] points = null;
+        
+        final Point[] points;
         if (runMode == Mode.RANDOM) {
             points = new Point[randPointNum];
             for (int i = 0; i < points.length; i++) {
-                points[i] = new Point(randomWithRange(0, 10024), randomWithRange(0, 10024));
+                points[i] = new Point(randomWithRange(minCoord, maxCoord), randomWithRange(minCoord, maxCoord));
             }
 
             if (points.length == 1) {
                 System.out.println("Single point " + new Circle(points[0], 0));
                 return;
             }
+
         } else {
             points = fileToPoints(filePath);
         }
-        int threadNum = 1;
+        
+        int threadNum       = 1;
         int pointsPerThread = points.length;
         int minPointsPerThread = 2;
+        
         if (points.length > minPointsPerThread * 2) {
             threadNum = Math.min(maxThreads, points.length / minPointsPerThread);
             pointsPerThread = points.length / threadNum;
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
-
         Set<Callable<Circle>> callables = new HashSet<>();
+        
         int start = 0, end = 0;
         for (int i = 0; i < threadNum; i++) {
             start = end;
@@ -202,6 +211,16 @@ public class Main {
         if (singleSol == null || solution == null) {
             showPoints(points);
             System.exit(1);
+        }
+        
+        final Circle solutionForUI = solution;
+        if (!quietFlag) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new MecGUI(Arrays.asList(points), solutionForUI);
+                }
+            });
         }
 
         System.out.println("Debug: Multi-thread result " + solution);
