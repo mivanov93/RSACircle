@@ -32,7 +32,7 @@ public class Main {
     private static int maxThreads;
     private static boolean quietFlag;
     
-    private static final int maxCoord = 10240;
+    private static final int maxCoord = 2024;
     private static final int minCoord = 0;
 
     private enum Mode {
