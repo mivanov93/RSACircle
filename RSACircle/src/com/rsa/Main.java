@@ -26,16 +26,17 @@ public class Main {
 
     private static Options sOptions;
     private static Mode runMode;
-    
+
     private static int randPointsNum;
     private static String filePath;
     private static int maxThreads;
     private static boolean quietFlag;
-    
-    private static final int maxCoord = 2024;
+
+    private static final int maxCoord = 10240;
     private static final int minCoord = 0;
 
     private enum Mode {
+
         FILE, RANDOM
     }
 
@@ -43,7 +44,7 @@ public class Main {
 
         configOptions();
         parseOptions(args);
-        
+
         System.out.println("Debug: " + runMode + " mode, " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file, quiet=" + quietFlag);
         try {
             for (int i = 0; i < 1; i++) {
@@ -87,10 +88,10 @@ public class Main {
 
             if (cmd.hasOption("n")) {
                 randPointsNum = Integer.parseInt(cmd.getOptionValue("n"));
-                runMode       = Mode.RANDOM;
+                runMode = Mode.RANDOM;
             } else if (cmd.hasOption("i")) {
-                filePath      = cmd.getOptionValue("i");
-                runMode       = Mode.FILE;
+                filePath = cmd.getOptionValue("i");
+                runMode = Mode.FILE;
             } else {
                 System.err.println("Verify validation...");
                 System.exit(1);
@@ -140,8 +141,9 @@ public class Main {
                     }
 
                     if (count != 1 && (count == 2 || count % 2 == 1)) {
-                        if(k > points.length-1)
+                        if (k > points.length - 1) {
                             throw new Exception("Too many points in file");
+                        }
                         points[k++] = new Point(lastI, i);
                     }
                 }
@@ -160,7 +162,7 @@ public class Main {
     }
 
     private static void run(Mode runMode, int maxThreads, int randPointNum, String filePath, boolean quietFlag) throws Exception {
-        
+
         final Point[] points;
         if (runMode == Mode.RANDOM) {
             points = new Point[randPointNum];
@@ -176,24 +178,27 @@ public class Main {
         } else {
             points = fileToPoints(filePath);
         }
-        
-        int threadNum       = 1;
-        int pointsPerThread = points.length;
+
+        GrahamScan test = new GrahamScan(points);
+        Point[] hullPoints = test.hull();
+
+        int threadNum = 1;
+        int pointsPerThread = hullPoints.length;
         int minPointsPerThread = 2;
-        
-        if (points.length > minPointsPerThread * 2) {
-            threadNum = Math.min(maxThreads, points.length / minPointsPerThread);
-            pointsPerThread = points.length / threadNum;
+
+        if (hullPoints.length > minPointsPerThread * 2) {
+            threadNum = Math.min(maxThreads, hullPoints.length / minPointsPerThread);
+            pointsPerThread = hullPoints.length / threadNum;
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         Set<Callable<Circle>> callables = new HashSet<>();
-        
+
         int start = 0, end = 0;
         for (int i = 0; i < threadNum; i++) {
             start = end;
-            end = (i == threadNum - 1 ? points.length : start + minPointsPerThread + pointsPerThread);
-            callables.add(new FindSecWorker(points, start, end, quietFlag));
+            end = (i == threadNum - 1 ? hullPoints.length : start + minPointsPerThread + pointsPerThread);
+            callables.add(new FindSecWorker(hullPoints, start, end, quietFlag));
         }
 
         List<Future<Circle>> futures = executorService.invokeAll(callables);
@@ -207,12 +212,15 @@ public class Main {
 
         executorService.shutdown();
 
-        Circle singleSol = new FindSecWorker(points, 0, points.length, quietFlag).call();
-        if (singleSol == null || solution == null) {
+        //Circle singleSol = new FindSecWorker(points, 0, points.length, quietFlag).call();
+        Circle grahamSingleSol = new FindSecWorker(hullPoints, 0, hullPoints.length, quietFlag).call();
+        if (grahamSingleSol == null || solution == null) {
             showPoints(points);
             System.exit(1);
         }
         
+        
+
         final Circle solutionForUI = solution;
         if (!quietFlag) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -224,7 +232,8 @@ public class Main {
         }
 
         System.out.println("Debug: Multi-thread result " + solution);
-        System.out.println("Debug: Single thread check " + singleSol);
+        //System.out.println("Debug: Single thread check " + singleSol);
+        System.out.println("Debug: Single thread check " + grahamSingleSol);
 
         //this is buggy, so just for testing:
         //Circle recurAlgoResult=new FindSecWorker(points, 0, points.length).recurAlgo(points.length,points,0);
