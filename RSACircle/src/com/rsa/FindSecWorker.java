@@ -96,9 +96,9 @@ public class FindSecWorker implements Callable {
                 }
             }
         }
-        long duration = (System.nanoTime() - startTime) / 1000000;//in ms
+        long duration = (System.nanoTime() - startTime) / 1000;//in us
         if (!mquiet) {
-            System.out.println("Thread from " + mstartIndex + " to " + mendIndex + " finished in " + duration + "ms");
+            System.out.println("Thread from " + mstartIndex + " to " + mendIndex + " finished in " + duration + "us");
         }
         return solution;
     }

@@ -14,7 +14,7 @@ import org.apache.commons.cli.CommandLine;
 
 public class Algo {
     
-    private static final int maxCoord = 500;
+    private static final int maxCoord = 10240;
     private static final int minCoord = 0;
 
     private enum Mode { FILE, RANDOM }
