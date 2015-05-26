@@ -53,7 +53,7 @@ public class AppGUI extends JFrame {
         JScrollPane scrollPane = form.getjScrollPane3(); 
 
         drawPanel = new DrawPanel();
-        drawPanel.setPreferredSize(new Dimension(60000, 60000));
+        drawPanel.setPreferredSize(new Dimension(160000, 160000));
         drawPanel.setBackground(Color.yellow);
         scrollPane.add(drawPanel);
         scrollPane.setViewportView(drawPanel);
@@ -78,6 +78,7 @@ class DrawPanel extends javax.swing.JPanel {
 
     private List<Point> mPoints;
     private Circle mCircle;
+    private double radScale;
 
     public DrawPanel() {
         mPoints = null;
@@ -90,6 +91,11 @@ class DrawPanel extends javax.swing.JPanel {
         super.paintComponent(g);
         doDrawing(g);
     }
+    
+    private  double toSc(Double param)
+    {
+        return radScale*param;
+    }
 
     private void doDrawing(Graphics g) {
         if (mPoints == null || mCircle == null) {
@@ -98,24 +104,40 @@ class DrawPanel extends javax.swing.JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLACK);
-        Double pScale = 8.0 / 30.0;
-        g2d.scale(pScale, pScale);
+        Double pScale = 130.0 / 30.0;
+        g2d.scale(pScale, pScale);  
+        radScale = 200/mCircle.getRadius();
+ 
         Double dispConst = 50.0;
-        Double xDisp = dispConst / pScale + Math.abs(mCircle.getRadius() - mCircle.getCenter().getX());
-        Double yDisp = dispConst / pScale + Math.abs(mCircle.getRadius() - mCircle.getCenter().getX());
-        Double dispSize = dispConst * pScale * 1;
+        Double xDisp = dispConst/pScale + toSc(Math.abs(mCircle.getRadius() - mCircle.getCenter().getX()));
+        Double yDisp = dispConst/pScale + toSc(Math.abs(mCircle.getRadius() - mCircle.getCenter().getX()));
+        Double dispSize = dispConst * Math.pow(pScale,1/8)/radScale/10;
+        
         for (Point p : mPoints) {
-            System.out.println("Drawing: " + p.getX() + ", " + p.getY());
-            g2d.setColor(Color.RED);
-            Ellipse2D myEl = new Ellipse2D.Double(p.getX() + xDisp - dispSize / 2, p.getY() + yDisp - dispSize / 2, dispSize, dispSize);
+            //System.out.println("Drawing: " + p.getX() + ", " + p.getY());
+            g2d.setColor(Color.RED);  
+            Ellipse2D myEl = new Ellipse2D.Double(
+                    toSc(p.getX()  - dispSize / 2)+ xDisp, 
+                    toSc(p.getY()  - dispSize / 2)+ yDisp, 
+                    toSc(dispSize), 
+                    toSc(dispSize));
             g2d.fill(myEl);
             g2d.setColor(Color.BLACK);
-            g2d.draw(new Line2D.Double(p.getX() + xDisp, p.getY() + yDisp, p.getX() + xDisp, p.getY() + yDisp));
-
+            g2d.draw(new Line2D.Double(
+                    toSc(p.getX() )+ xDisp, 
+                    toSc(p.getY() )+ yDisp, 
+                    toSc(p.getX() )+ xDisp, 
+                    toSc(p.getY() )+ yDisp));
         }
-        System.out.println("Drawing circle... with center: " + mCircle.getCenter() + " d = " + mCircle.getDiameter());
-        g2d.draw(new Ellipse2D.Double(mCircle.getCenter().getX() - mCircle.getRadius() + xDisp, mCircle.getCenter().getY() + yDisp - mCircle.getRadius(), mCircle.getDiameter(), mCircle.getDiameter()));
-        System.out.println(mCircle.getCenter().getX() - mCircle.getRadius() + xDisp);
+        //System.out.println("Drawing circle... with center: " + mCircle.getCenter() + " d = " + mCircle.getDiameter());
+        g2d.draw(new Ellipse2D.Double(
+                toSc(mCircle.getCenter().getX() - mCircle.getRadius() )+ xDisp, 
+                toSc(mCircle.getCenter().getY()  - mCircle.getRadius())+ yDisp, 
+                toSc(mCircle.getDiameter()), 
+                toSc(mCircle.getDiameter())
+                )
+        );
+        //System.out.println(mCircle.getCenter().getX() - mCircle.getRadius() + xDisp);
     }
     
     public void setData(List<Point> points, Circle circle) {
