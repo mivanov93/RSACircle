@@ -89,7 +89,7 @@ public class Form extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(137, 137, 137)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(153, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jScrollPane3)
         );
         layout.setVerticalGroup(
@@ -123,6 +123,7 @@ public class Form extends javax.swing.JPanel {
     public JPanel getjPanel1() {
         return jPanel1;
     }
+
 
     public JTextArea getjTextArea1() {
         return jTextArea1;

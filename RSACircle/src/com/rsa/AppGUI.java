@@ -50,14 +50,13 @@ public class AppGUI extends JFrame {
         });
         
         // 2) panelDraw
-        JScrollPane scrollPane = form.getjScrollPane3();
-        scrollPane.setBackground(Color.red);
-        
+        JScrollPane scrollPane = form.getjScrollPane3(); 
+
         drawPanel = new DrawPanel();
         drawPanel.setPreferredSize(new Dimension(60000, 60000));
-        
+        drawPanel.setBackground(Color.yellow);
         scrollPane.add(drawPanel);
-        
+        scrollPane.setViewportView(drawPanel);
         // 3) panelLog
         textArea = form.getjTextArea1();
         textArea.setText("Calculating...");
@@ -71,12 +70,11 @@ public class AppGUI extends JFrame {
     
     public void setData(List<Point> points, Circle circle) {
         drawPanel.setData(points, circle);
-        
         textArea.setText("Done.");
     }
 }
 
-class DrawPanel extends JPanel {
+class DrawPanel extends javax.swing.JPanel {
 
     private List<Point> mPoints;
     private Circle mCircle;
@@ -94,7 +92,6 @@ class DrawPanel extends JPanel {
     }
 
     private void doDrawing(Graphics g) {
-        
         if (mPoints == null || mCircle == null) {
             return;
         }
@@ -122,10 +119,10 @@ class DrawPanel extends JPanel {
     }
     
     public void setData(List<Point> points, Circle circle) {
-        
         mPoints = points;
         mCircle = circle;
         
+        repaint();
         updateUI();
     }
 }
