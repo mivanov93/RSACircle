@@ -1,6 +1,7 @@
 package com.rsa;
 
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -13,22 +14,35 @@ import java.util.concurrent.Future;
 import org.apache.commons.cli.CommandLine;
 
 public class Algo {
-    
+
     private static final int maxCoord = 10240;
     private static final int minCoord = 0;
 
-    private enum Mode { FILE, RANDOM }
-    
-    private Mode    runMode;
-    private int     randPointsNum;
-    private int     maxThreads;
-    private String  filePath;
+    private enum Mode {
+
+        FILE, RANDOM
+    }
+
+    private Mode runMode;
+    private int randPointsNum;
+    private int maxThreads;
+    private String filePath;
     private boolean quietFlag;
-    
+
     private List<Point> points;
-    
+
+    private class StartEnd {
+
+        public int start, end;
+
+        public StartEnd(int pstart, int pend) {
+            this.start = pstart;
+            this.end = pend;
+        }
+    };
+
     public Circle run(CommandLine cmd) throws Exception {
-        
+
         if (cmd.hasOption("n")) {
             randPointsNum = Integer.parseInt(cmd.getOptionValue("n"));
             runMode = Mode.RANDOM;
@@ -41,10 +55,10 @@ public class Algo {
         }
 
         maxThreads = Integer.parseInt(cmd.getOptionValue("t"));
-        quietFlag  = cmd.hasOption("q");
-        
+        quietFlag = cmd.hasOption("q");
+
         System.out.println("Debug: " + runMode + " mode, " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file");
-        
+
         final Point[] points;
         if (runMode == Mode.RANDOM) {
             points = new Point[randPointsNum];
@@ -64,23 +78,39 @@ public class Algo {
         GrahamScan test = new GrahamScan(points);
         Point[] hullPoints = test.hull();
 
-        int threadNum = 1;
-        int pointsPerThread = hullPoints.length;
-        int minPointsPerThread = 2;
+        int threadNum = maxThreads;
+        int n = hullPoints.length;
 
-        if (hullPoints.length > minPointsPerThread * 2) {
-            threadNum = Math.min(maxThreads, hullPoints.length / minPointsPerThread);
-            pointsPerThread = hullPoints.length / threadNum;
+        int sum = 0, startPoint = 0;
+        //black magic :D
+        int allTriplesDoubles = n * (n - 1) * (n - 2) / 6 + n * (n - 1) / 2;
+        int triplesDoublesPerThread = allTriplesDoubles / threadNum;
+        ArrayList<StartEnd> stEndList = new ArrayList<StartEnd>();
+        //System.out.println(n+" "+triplesDoublesPerThread+" "+allTriplesDoubles);
+        for (int i = 0; i < n; i++) {
+            //more black magic :D
+            sum += (int) (0.5 * (n - i - 1) * (n - i - 2) + (n - 1 - i));
+            if (sum >= triplesDoublesPerThread) {
+                stEndList.add(new StartEnd(startPoint, i + 1));
+                //System.out.println(sum);
+                sum = 0;
+                startPoint = i + 1;
+            } else if (i == n - 1) {
+                stEndList.add(new StartEnd(startPoint, i + 1));
+            }
         }
+        threadNum = stEndList.size();
 
+//        for(StartEnd ele : stEndList)
+//        {
+//            System.out.println(ele.start+" "+ele.end);
+//        }
+//        System.out.println(threadNum);
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         Set<Callable<Circle>> callables = new HashSet<>();
 
-        int start = 0, end = 0;
         for (int i = 0; i < threadNum; i++) {
-            start = end;
-            end = (i == threadNum - 1 ? hullPoints.length : start + minPointsPerThread + pointsPerThread);
-            callables.add(new FindSecWorker(hullPoints, start, end, quietFlag));
+            callables.add(new FindSecWorker(hullPoints, stEndList.get(i).start, stEndList.get(i).end, quietFlag));
         }
 
         List<Future<Circle>> futures = executorService.invokeAll(callables);
@@ -108,12 +138,11 @@ public class Algo {
         //this is buggy, so just for testing:
         //Circle recurAlgoResult=new FindSecWorker(points, 0, points.length).recurAlgo(points.length,points,0);
         //System.out.println("Recur algo result " +recurAlgoResult);
-        
         this.points = Arrays.asList(points);
-        
+
         return solution;
     }
-    
+
     private int randomWithRange(int min, int max) {
         int range = (max - min) + 1;
         return (int) (Math.random() * range) + min;
@@ -124,7 +153,7 @@ public class Algo {
             System.out.println(point);
         }
     }
-    
+
     public List<Point> getPoints() {
         return points;
     }
@@ -170,13 +199,11 @@ public class Algo {
         }
         return points;
     }
-    
+
     private void log(String msg) {
-        
-        
-        
+
         if (!quietFlag) {
-            
+
         }
     }
 }
