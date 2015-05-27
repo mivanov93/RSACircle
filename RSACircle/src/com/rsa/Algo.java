@@ -146,12 +146,12 @@ public class Algo {
         executorService.shutdown();
 
         //Circle singleSol = new FindSecWorker(mpoints, 0, mpoints.length, quietFlag).call();
-        Circle grahamSingleSol = new FindSecWorker(this, hullPoints, 0, hullPoints.length, quietFlag).call();
-        if (grahamSingleSol == null || solution == null) {
-            showPoints(points);
-            System.exit(1);
-        }
-        log("Single thread check " + grahamSingleSol);
+//        Circle grahamSingleSol = new FindSecWorker(this, hullPoints, 0, hullPoints.length, quietFlag).call();
+//        if (grahamSingleSol == null || solution == null) {
+//            showPoints(points);
+//            System.exit(1);
+//        }
+//        log("Single thread check " + grahamSingleSol);
         rawLog(solution.toString() + " calculated in " + (System.nanoTime() - starTime) / 1000 + " us");
 
         //this is buggy, so just for testing:
