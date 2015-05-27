@@ -70,7 +70,7 @@ public class Main {
             public void run() {
                 // Construct the UI components on the EDT thread
                 final AppGUI appGUI = new AppGUI();
-                final Algo   algo   = new Algo();
+                final Algo   algo   = new Algo(appGUI);
 
                 // Run the consuming operation on a worker thread
                 SwingWorker worker = new SwingWorker<Circle, Void>() {

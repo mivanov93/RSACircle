@@ -19,7 +19,6 @@ public class Algo {
     private static final int minCoord = 0;
 
     private enum Mode {
-
         FILE, RANDOM
     }
 
@@ -30,6 +29,8 @@ public class Algo {
     private boolean quietFlag;
 
     private List<Point> points;
+    
+    private AppGUI appGUI;
 
     private class StartEnd {
 
@@ -40,8 +41,18 @@ public class Algo {
             this.end = pend;
         }
     };
+    
+    public Algo() {
+        this(null);
+    }
+    
+    public Algo(AppGUI appGUI) {
+        this.appGUI = appGUI;
+    }
 
     public Circle run(CommandLine cmd) throws Exception {
+        
+        log("Running algorithm...");
 
         if (cmd.hasOption("n")) {
             randPointsNum = Integer.parseInt(cmd.getOptionValue("n"));
@@ -50,31 +61,36 @@ public class Algo {
             filePath = cmd.getOptionValue("i");
             runMode = Mode.FILE;
         } else {
-            System.err.println("Verify validation...");
+            log("Verify validation...");
             System.exit(1);
         }
 
         maxThreads = Integer.parseInt(cmd.getOptionValue("t"));
         quietFlag = cmd.hasOption("q");
 
-        System.out.println("Debug: " + runMode + " mode, " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file");
+        log("Mode:" + runMode + ", " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file");
 
         final Point[] points;
         if (runMode == Mode.RANDOM) {
+            log("Generating random points...");
+            
             points = new Point[randPointsNum];
             for (int i = 0; i < points.length; i++) {
                 points[i] = new Point(randomWithRange(minCoord, maxCoord), randomWithRange(minCoord, maxCoord));
             }
 
             if (points.length == 1) {
-                System.out.println("Single point " + new Circle(points[0], 0));
+                log("Single point: " + new Circle(points[0], 0));
                 return null;
             }
 
         } else {
+            log("Parsing points from file...");
+            
             points = fileToPoints(filePath);
         }
 
+        log("Searching potential points using convex hull...");
         GrahamScan test = new GrahamScan(points);
         Point[] hullPoints = test.hull();
 
@@ -85,14 +101,14 @@ public class Algo {
         //black magic :D
         int allTriplesDoubles = n * (n - 1) * (n - 2) / 6 + n * (n - 1) / 2;
         int triplesDoublesPerThread = allTriplesDoubles / threadNum;
-        ArrayList<StartEnd> stEndList = new ArrayList<StartEnd>();
-        //System.out.println(n+" "+triplesDoublesPerThread+" "+allTriplesDoubles);
+        ArrayList<StartEnd> stEndList = new ArrayList<>();
+        
         for (int i = 0; i < n; i++) {
             //more black magic :D
             sum += (int) (0.5 * (n - i - 1) * (n - i - 2) + (n - 1 - i));
             if (sum >= triplesDoublesPerThread) {
                 stEndList.add(new StartEnd(startPoint, i + 1));
-                //System.out.println(sum);
+
                 sum = 0;
                 startPoint = i + 1;
             } else if (i == n - 1) {
@@ -101,18 +117,15 @@ public class Algo {
         }
         threadNum = stEndList.size();
 
-//        for(StartEnd ele : stEndList)
-//        {
-//            System.out.println(ele.start+" "+ele.end);
-//        }
-//        System.out.println(threadNum);
+        log("Constructing executor service...");
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
         Set<Callable<Circle>> callables = new HashSet<>();
 
         for (int i = 0; i < threadNum; i++) {
-            callables.add(new FindSecWorker(hullPoints, stEndList.get(i).start, stEndList.get(i).end, quietFlag));
+            callables.add(new FindSecWorker(this, hullPoints, stEndList.get(i).start, stEndList.get(i).end, quietFlag));
         }
 
+        log("Executing tasks...");
         List<Future<Circle>> futures = executorService.invokeAll(callables);
 
         Circle solution = null;
@@ -121,19 +134,19 @@ public class Algo {
                 solution = future.get();
             }
         }
-
+        
+        log("Ready!");
         executorService.shutdown();
 
         //Circle singleSol = new FindSecWorker(points, 0, points.length, quietFlag).call();
-        Circle grahamSingleSol = new FindSecWorker(hullPoints, 0, hullPoints.length, quietFlag).call();
+        Circle grahamSingleSol = new FindSecWorker(this, hullPoints, 0, hullPoints.length, quietFlag).call();
         if (grahamSingleSol == null || solution == null) {
             showPoints(points);
             System.exit(1);
         }
 
-        System.out.println("Debug: Multi-thread result " + solution);
-        //System.out.println("Debug: Single thread check " + singleSol);
-        System.out.println("Debug: Single thread check " + grahamSingleSol);
+        log("Multi-thread result " + solution);
+        log("Single thread check " + grahamSingleSol);
 
         //this is buggy, so just for testing:
         //Circle recurAlgoResult=new FindSecWorker(points, 0, points.length).recurAlgo(points.length,points,0);
@@ -149,9 +162,7 @@ public class Algo {
     }
 
     private void showPoints(Point[] points) {
-        for (Point point : points) {
-            System.out.println(point);
-        }
+        log(Arrays.toString(points));
     }
 
     public List<Point> getPoints() {
@@ -200,10 +211,12 @@ public class Algo {
         return points;
     }
 
-    private void log(String msg) {
+    public void log(String msg) {
 
-        if (!quietFlag) {
-
+        if (!quietFlag && appGUI != null) {
+            appGUI.log(msg);
         }
+        
+        System.out.println(msg);
     }
 }

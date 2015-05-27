@@ -12,7 +12,6 @@ import java.awt.geom.Line2D;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -25,6 +24,8 @@ public class AppGUI extends JFrame {
     private JButton btnZoomOut;
     private JTextArea textArea;
 
+    private static int count = 1;
+    
     public AppGUI() {
         initUI();
     }
@@ -34,12 +35,11 @@ public class AppGUI extends JFrame {
         Form form = new Form();
         getContentPane().add(form);
 
-        // 2) panelDraw
-        JScrollPane scrollPane = form.getjScrollPane3();
-
         drawPanel = new DrawPanel();
-        drawPanel.setPreferredSize(new Dimension(160000, 160000));
+        drawPanel.setPreferredSize(new Dimension(8000, 8000));
         drawPanel.setBackground(new Color(1,255,3));
+        
+        JScrollPane scrollPane = form.getjScrollPane3();
         scrollPane.add(drawPanel);
         scrollPane.setViewportView(drawPanel);
 
@@ -48,7 +48,6 @@ public class AppGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
-
                     @Override
                     public void run() {
                         drawPanel.setZoomScale(drawPanel.getZoomScale() * 1.1);
@@ -62,7 +61,6 @@ public class AppGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
-
                     @Override
                     public void run() {
                         drawPanel.setZoomScale(drawPanel.getZoomScale() / 1.1);
@@ -70,12 +68,12 @@ public class AppGUI extends JFrame {
                 });
             }
         });
-        // 3) panelLog
+        
         textArea = form.getjTextArea1();
-        textArea.setText("Calculating...");
+        log("Initializing...");
 
         setTitle("Minimal enclosing circle");
-        setSize(600, 380);
+        setSize(800, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -83,7 +81,17 @@ public class AppGUI extends JFrame {
 
     public void setData(List<Point> points, Circle circle) {
         drawPanel.setData(points, circle);
-        textArea.setText("Done.");
+        log("Done.");
+    }
+    
+    public void log(final String msg) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                textArea.append(count++ + ". " + msg + "\n");
+            }
+        });
     }
 }
 
@@ -106,10 +114,6 @@ class DrawPanel extends javax.swing.JPanel {
         doDrawing(g);
     }
 
-    private double toRadScale(Double param) {
-        return radScale * param;
-    }
-
     public void setZoomScale(double newScale) {
         zoomScale = Math.min(Math.max(0.01, newScale), 10.0);
         repaint();
@@ -118,6 +122,10 @@ class DrawPanel extends javax.swing.JPanel {
     public double getZoomScale() {
         return zoomScale;
     }
+    
+    private double toRadScale(Double param) {
+        return radScale * param;
+    }
 
     private void doDrawing(Graphics g) {
         if (mPoints == null || mCircle == null) {
@@ -125,6 +133,7 @@ class DrawPanel extends javax.swing.JPanel {
         }
 
         Graphics2D g2d = (Graphics2D) g;
+        
         //antialiasing, smooth figures
         g2d.setRenderingHint(
                 RenderingHints.KEY_ANTIALIASING,
@@ -145,9 +154,10 @@ class DrawPanel extends javax.swing.JPanel {
         Double szConst = 50.0;
         Double pointDispSize = szConst * Math.pow(zoomScale, 1 / 8) / radScale / 10;
 
+        
         for (Point p : mPoints) {
-            //System.out.println("Drawing: " + p.getX() + ", " + p.getY());
             g2d.setColor(Color.RED);
+            
             //draw circle around point
             Ellipse2D myEl = new Ellipse2D.Double(
                     toRadScale(p.getX() - pointDispSize / 2) + xDisp,
@@ -156,6 +166,7 @@ class DrawPanel extends javax.swing.JPanel {
                     toRadScale(pointDispSize));
             g2d.fill(myEl);
             g2d.setColor(Color.BLACK);
+            
             //draw point
             g2d.draw(new Line2D.Double(
                     toRadScale(p.getX()) + xDisp,
@@ -163,7 +174,6 @@ class DrawPanel extends javax.swing.JPanel {
                     toRadScale(p.getX()) + xDisp,
                     toRadScale(p.getY()) + yDisp));
         }
-        //System.out.println("Drawing circle... with center: " + mCircle.getCenter() + " d = " + mCircle.getDiameter());
 
         //draw the circle
         g2d.draw(new Ellipse2D.Double(
@@ -173,7 +183,6 @@ class DrawPanel extends javax.swing.JPanel {
                 toRadScale(mCircle.getDiameter())
         )
         );
-        //System.out.println(mCircle.getCenter().getX() - mCircle.getRadius() + xDisp);
     }
 
     public void setData(List<Point> points, Circle circle) {
