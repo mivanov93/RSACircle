@@ -73,7 +73,7 @@ public class AppGUI extends JFrame {
         log("Initializing...");
 
         setTitle("Minimal enclosing circle");
-        setSize(800, 550);
+        setSize(800, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);

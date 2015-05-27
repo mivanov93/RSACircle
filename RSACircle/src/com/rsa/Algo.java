@@ -19,6 +19,7 @@ public class Algo {
     private static final int minCoord = 0;
 
     private enum Mode {
+
         FILE, RANDOM
     }
 
@@ -28,8 +29,8 @@ public class Algo {
     private String filePath;
     private boolean quietFlag;
 
-    private List<Point> points;
-    
+    private List<Point> mpoints;
+
     private AppGUI appGUI;
 
     private class StartEnd {
@@ -41,18 +42,17 @@ public class Algo {
             this.end = pend;
         }
     };
-    
+
     public Algo() {
         this(null);
     }
-    
+
     public Algo(AppGUI appGUI) {
         this.appGUI = appGUI;
     }
 
     public Circle run(CommandLine cmd) throws Exception {
-        
-        log("Running algorithm...");
+        long starTime = System.nanoTime();
 
         if (cmd.hasOption("n")) {
             randPointsNum = Integer.parseInt(cmd.getOptionValue("n"));
@@ -67,13 +67,14 @@ public class Algo {
 
         maxThreads = Integer.parseInt(cmd.getOptionValue("t"));
         quietFlag = cmd.hasOption("q");
+        log("Running algorithm...");
 
         log("Mode:" + runMode + ", " + maxThreads + " threads, " + randPointsNum + " rand points, " + filePath + " file");
 
         final Point[] points;
         if (runMode == Mode.RANDOM) {
             log("Generating random points...");
-            
+
             points = new Point[randPointsNum];
             for (int i = 0; i < points.length; i++) {
                 points[i] = new Point(randomWithRange(minCoord, maxCoord), randomWithRange(minCoord, maxCoord));
@@ -86,7 +87,7 @@ public class Algo {
 
         } else {
             log("Parsing points from file...");
-            
+
             points = fileToPoints(filePath);
         }
 
@@ -97,25 +98,31 @@ public class Algo {
         int threadNum = maxThreads;
         int n = hullPoints.length;
 
-        int sum = 0, startPoint = 0;
-        //black magic :D
-        int allTriplesDoubles = n * (n - 1) * (n - 2) / 6 + n * (n - 1) / 2;
-        int triplesDoublesPerThread = allTriplesDoubles / threadNum;
         ArrayList<StartEnd> stEndList = new ArrayList<>();
-        
-        for (int i = 0; i < n; i++) {
-            //more black magic :D
-            sum += (int) (0.5 * (n - i - 1) * (n - i - 2) + (n - 1 - i));
-            if (sum >= triplesDoublesPerThread) {
-                stEndList.add(new StartEnd(startPoint, i + 1));
+        if (maxThreads != 1) {
+            int sum = 0, startPoint = 0;
+            //black magic :D
+            int allTriplesDoubles = n * (n - 1) * (n - 2) / 6 + n * (n - 1) / 2;
+            int triplesDoublesPerThread = allTriplesDoubles / threadNum;
 
-                sum = 0;
-                startPoint = i + 1;
-            } else if (i == n - 1) {
-                stEndList.add(new StartEnd(startPoint, i + 1));
+            for (int i = 0; i < n; i++) {
+                //more black magic :D
+                sum += (int) (0.5 * (n - i - 1) * (n - i - 2) + (n - 1 - i));
+                if (maxThreads == stEndList.size() - 1) {
+                    stEndList.add(new StartEnd(startPoint, n));
+                    break;
+                } else if (sum >= triplesDoublesPerThread || (i == n - 1)) {
+                    stEndList.add(new StartEnd(startPoint, i + 1));
+                    sum = 0;
+                    startPoint = i + 1;
+
+                }
             }
+            threadNum = stEndList.size();
+        } else {
+            threadNum = 1;
+            stEndList.add(new StartEnd(0, n));
         }
-        threadNum = stEndList.size();
 
         log("Constructing executor service...");
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
@@ -134,24 +141,23 @@ public class Algo {
                 solution = future.get();
             }
         }
-        
+
         log("Ready!");
         executorService.shutdown();
 
-        //Circle singleSol = new FindSecWorker(points, 0, points.length, quietFlag).call();
+        //Circle singleSol = new FindSecWorker(mpoints, 0, mpoints.length, quietFlag).call();
         Circle grahamSingleSol = new FindSecWorker(this, hullPoints, 0, hullPoints.length, quietFlag).call();
         if (grahamSingleSol == null || solution == null) {
             showPoints(points);
             System.exit(1);
         }
-
-        log("Multi-thread result " + solution);
         log("Single thread check " + grahamSingleSol);
+        rawLog(solution.toString() + " calculated in " + (System.nanoTime() - starTime) / 1000 + " us");
 
         //this is buggy, so just for testing:
-        //Circle recurAlgoResult=new FindSecWorker(points, 0, points.length).recurAlgo(points.length,points,0);
+        //Circle recurAlgoResult=new FindSecWorker(mpoints, 0, mpoints.length).recurAlgo(mpoints.length,mpoints,0);
         //System.out.println("Recur algo result " +recurAlgoResult);
-        this.points = Arrays.asList(points);
+        this.mpoints = Arrays.asList(points);
 
         return solution;
     }
@@ -166,7 +172,7 @@ public class Algo {
     }
 
     public List<Point> getPoints() {
-        return points;
+        return mpoints;
     }
 
     private Point[] fileToPoints(String filePath) throws Exception {
@@ -191,7 +197,7 @@ public class Algo {
                     }
 
                     if (count != 1 && (count == 2 || count % 2 == 1)) {
-                        if (k > points.length - 1) {
+                        if (points != null && k > points.length - 1) {
                             throw new Exception("Too many points in file");
                         }
                         points[k++] = new Point(lastI, i);
@@ -211,12 +217,17 @@ public class Algo {
         return points;
     }
 
-    public void log(String msg) {
-
-        if (!quietFlag && appGUI != null) {
+    public void rawLog(String msg) {
+        if (appGUI != null) {
             appGUI.log(msg);
         }
-        
         System.out.println(msg);
+    }
+
+    public void log(String msg) {
+
+        if (!quietFlag) {
+            rawLog(msg);
+        }
     }
 }
