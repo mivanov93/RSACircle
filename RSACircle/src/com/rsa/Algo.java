@@ -108,7 +108,7 @@ public class Algo {
             for (int i = 0; i < n; i++) {
                 //more black magic :D
                 sum += (int) (0.5 * (n - i - 1) * (n - i - 2) + (n - 1 - i));
-                if (maxThreads == stEndList.size() - 1) {
+                if (maxThreads == stEndList.size() + 1) {
                     stEndList.add(new StartEnd(startPoint, n));
                     break;
                 } else if (sum >= triplesDoublesPerThread || (i == n - 1)) {
