@@ -34,6 +34,7 @@ public class FindSecWorker implements Callable {
         for (int i = mstartIndex; i < mendIndex; i++) {
             for (int j = i + 1; j < mpoints.length; j++) {
                 testPointSol = new Circle(mpoints[i], mpoints[j]);
+                algo.drawSolutionAsync(testPointSol);
                 if (testPointSol.containAll(mpoints)) {
                     if (solution == null || testPointSol.getRadius() < solution.getRadius()) {
                         solution = testPointSol;
@@ -43,7 +44,8 @@ public class FindSecWorker implements Callable {
                 for (int k = j + 1; k < mpoints.length; k++) {
                     try {
                         testPointSol = new Circle(mpoints[i], mpoints[j], mpoints[k]);
-                        if (testPointSol.containAll(mpoints)) {
+                        algo.drawSolutionAsync(testPointSol);
+                        if (testPointSol.containAll(mpoints)) {  
                             if (solution == null || testPointSol.getRadius() < solution.getRadius()) {
                                 solution = testPointSol;
                             }

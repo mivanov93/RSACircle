@@ -15,7 +15,7 @@ import org.apache.commons.cli.CommandLine;
 
 public class Algo {
 
-    private static final int maxCoord = 10240;
+    private static final int maxCoord = 100;
     private static final int minCoord = 0;
 
     private enum Mode {
@@ -90,10 +90,12 @@ public class Algo {
 
             points = fileToPoints(filePath);
         }
+        this.mpoints = Arrays.asList(points);
+        appGUI.setPoints(mpoints);
 
         log("Searching potential points using convex hull...");
         GrahamScan test = new GrahamScan(points);
-        Point[] hullPoints = test.hull();
+        Point[] hullPoints = points;//test.hull();
 
         int threadNum = maxThreads;
         int n = hullPoints.length;
@@ -157,7 +159,7 @@ public class Algo {
         //this is buggy, so just for testing:
         //Circle recurAlgoResult=new FindSecWorker(mpoints, 0, mpoints.length).recurAlgo(mpoints.length,mpoints,0);
         //System.out.println("Recur algo result " +recurAlgoResult);
-        this.mpoints = Arrays.asList(points);
+        
 
         return solution;
     }
@@ -222,6 +224,10 @@ public class Algo {
             appGUI.log(msg);
         }
         System.out.println(msg);
+    }
+
+    public void drawSolutionAsync(final Circle circle) {
+        appGUI.drawSolutionAsync(circle);
     }
 
     public void log(String msg) {

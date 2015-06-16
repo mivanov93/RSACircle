@@ -1,10 +1,6 @@
 package com.rsa;
 
-import com.computation.algo.GiftWrapping;
-import com.computation.algo.GrahamScanParallel;
-import com.computation.algo.QuickHull;
-import com.computation.common.Point2DCloud;
-import com.computation.common.Utils;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -19,13 +15,7 @@ import org.apache.commons.cli.ParseException;
 public class Main {
 
     public static void main(String[] args) {
-
-        final Point2DCloud point2DCloud = new Point2DCloud(100 /* points */,
-                Utils.WIDTH = 700,
-                Utils.HEIGHT = 700, true);
-        new QuickHull(point2DCloud, 4, true, 4);
-          point2DCloud.show();
-
+        
         Options opts = configOptions();
         CommandLine cmd = parseOptions(opts, args);
 
@@ -102,13 +92,11 @@ public class Main {
                         try {
                             circle = get();
                             points = algo.getPoints();
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (ExecutionException ex) {
+                        } catch (InterruptedException | ExecutionException ex) {
                             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
-                        appGUI.setData(points, circle);
+                        appGUI.drawSolution(circle);
                     }
                 };
 
